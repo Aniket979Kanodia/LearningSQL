@@ -138,3 +138,154 @@ mysql> select * from orders
 | 3003 |  767.19 | 1990-03-10 | 2001 | 1001 |
 +------+---------+------------+------+------+
 10 rows in set (0.00 sec)
+
+5) Find which salespeople currently have orders in the order table.
+>>
+mysql> SELECT DISTINCT SNUM, SNAME
+    -> FROM ORDERS
+    -> LEFT JOIN SALESPEOPLE
+    -> USING(SNUM);
++------+---------+
+| SNUM | SNAME   |
++------+---------+
+| 1007 | Rifkin  |
+| 1004 | Motika  |
+| 1001 | Peel    |
+| 1002 | Serres  |
+| 1003 | AxelRod |
++------+---------+
+
+6) List names of all customers matched with the salespeople serving them.
+>>
+mysql> SELECT CNAME, SNAME
+    -> FROM CUSTOMERS
+    -> LEFT JOIN SALESPEOPLE
+    -> USING(SNUM);
++----------+---------+
+| CNAME    | SNAME   |
++----------+---------+
+| Hoffman  | Peel    |
+| Glovanni | AxelRod |
+| Liu      | Serres  |
+| Grass    | Serres  |
+| Clemens  | Peel    |
+| Pereira  | Motika  |
+| Cisneros | Rifkin  |
++----------+---------+
+7 rows in set (0.02 sec)
+
+7) Find the names and numbers of all salespeople who have more than one customer.
+>>
+mysql> SELECT SNAME, SNUM
+    -> FROM CUSTOMERS
+    -> LEFT JOIN SALESPEOPLE
+    -> USING(SNUM)
+    -> GROUP BY SNUM
+    -> HAVING(COUNT(SNUM)>1);
++--------+------+
+| SNAME  | SNUM |
++--------+------+
+| Peel   | 1001 |
+| Serres | 1002 |
++--------+------+
+2 rows in set (0.00 sec)
+
+8) Count the orders of each of the salespeople and output the results in descending order.
+
+>>
+mysql> SELECT SNUM , COUNT(SNUM) As FREQUENCY
+    -> FROM ORDERS
+    -> GROUP BY SNUM
+    -> ORDER BY
+    -> COUNT(SNUM) DESC;
++------+-----------+
+| SNUM | FREQUENCY |
++------+-----------+
+| 1001 |         3 |
+| 1002 |         3 |
+| 1007 |         2 |
+| 1004 |         1 |
+| 1003 |         1 |
++------+-----------+
+5 rows in set (0.07 sec)
+
+9) List the customer table if and only if one or more of the customers in the Customer table are located in SanJose.
+>>
+mysql> SELECT *
+    -> FROM CUSTOMERS
+    -> WHERE EXISTS
+    -> (SELECT *
+    -> FROM CUSTOMERS
+    -> WHERE CITY = 'SanJose');
++------+----------+---------+--------+------+
+| CNUM | CNAME    | CITY    | RATING | SNUM |
++------+----------+---------+--------+------+
+| 2001 | Hoffman  | London  | 100    | 1001 |
+| 2002 | Glovanni | Rome    | 200    | 1003 |
+| 2003 | Liu      | SanJose | 200    | 1002 |
+| 2004 | Grass    | Berlin  | 300    | 1002 |
+| 2006 | Clemens  | London  | 100    | 1001 |
+| 2007 | Pereira  | Rome    | 100    | 1004 |
+| 2008 | Cisneros | SanJose | 300    | 1007 |
++------+----------+---------+--------+------+
+7 rows in set (0.03 sec)
+
+11) Find all the customers in SanJose who have a rating above 200.
+
+>>
+mysql> SELECT * FROM CUSTOMERS
+    -> WHERE CITY = 'SANJOSE' && RATING>200;
++------+----------+---------+--------+------+
+| CNUM | CNAME    | CITY    | RATING | SNUM |
++------+----------+---------+--------+------+
+| 2008 | Cisneros | SanJose | 300    | 1007 |
++------+----------+---------+--------+------+
+1 row in set, 1 warning (0.00 sec)
+
+12) List the names and commissions of all salespeople in London.
+
+>>
+mysql> SELECT SNAME , COMM
+    -> FROM SALESPEOPLE
+    -> WHERE CITY = 'LONDON';
++--------+------+
+| SNAME  | COMM |
++--------+------+
+| Peel   |   12 |
+| Motika |   11 |
+| Fran   |   25 |
++--------+------+
+3 rows in set (0.01 sec)
+
+13) List all the orders of Salesperson Motika from the orders table.
+>>
+mysql> SELECT ONUM , AMT , ODATE , CNUM ,SNAME
+    -> FROM ORDERS
+    -> LEFT JOIN SALESPEOPLE
+    -> USING (SNUM)
+    -> WHERE SNAME = 'MOTIKA';
++------+---------+------------+------+--------+
+| ONUM | AMT     | ODATE      | CNUM | SNAME  |
++------+---------+------------+------+--------+
+| 3002 | 1900.10 | 1990-03-10 | 2007 | Motika |
++------+---------+------------+------+--------+
+1 row in set (0.01 sec)
+
+14)Find all customers who booked orders on October 3.
+>> 
+mysql> SELECT ODATE , CNAME , CNUM
+    -> from orders
+    -> LEFT Join Customers
+    -> USING(CNUM)
+    -> where ODATE = '1990-03-10';
++------------+----------+------+
+| ODATE      | CNAME    | CNUM |
++------------+----------+------+
+| 1990-03-10 | Cisneros | 2008 |
+| 1990-03-10 | Pereira  | 2007 |
+| 1990-03-10 | Hoffman  | 2001 |
+| 1990-03-10 | Liu      | 2003 |
+| 1990-03-10 | Cisneros | 2008 |
++------------+----------+------+
+5 rows in set (0.00 sec)
+
