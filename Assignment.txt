@@ -1161,4 +1161,193 @@ mysql> SELECT RATING , CNAME, CNUM
 +--------+----------+------+
 7 rows in set (0.00 sec)
 
+76) Find the average commission for salespeople in London.
+>>
+mysql> select city ,avg(comm) as AVG_COMM from salespeople
+    -> group by city
+    -> having(city='London');
++--------+----------+
+| city   | AVG_COMM |
++--------+----------+
+| London |  16.0000 |
++--------+----------+
+1 row in set (0.01 sec)
 
+77) Find all orders credited to the same salesperson who services Hoffman.(cnum 2001).
+>>
+mysql> select * from orders
+    -> WHERE SNUM = (SELECT SNUM FROM ORDERS
+    -> WHERE CNUM = 2001);
++------+---------+------------+------+------+
+| ONUM | AMT     | ODATE      | CNUM | SNUM |
++------+---------+------------+------+------+
+| 3003 |  767.19 | 1990-03-10 | 2001 | 1001 |
+| 3008 | 4723.00 | 1990-05-10 | 2006 | 1001 |
+| 3011 | 9891.88 | 1990-06-10 | 2006 | 1001 |
++------+---------+------------+------+------+
+3 rows in set (0.00 sec)
+
+78) Find all salespeople whose commission is in between 0.10 and 0.12(both inclusive).
+>>
+mysql> SELECT * FROM SALESPEOPLE
+    -> WHERE COMM BETWEEN 10 AND 12;
++------+---------+----------+------+
+| SNUM | SNAME   | CITY     | COMM |
++------+---------+----------+------+
+| 1001 | Peel    | London   |   12 |
+| 1003 | AxelRod | New York |   10 |
+| 1004 | Motika  | London   |   11 |
++------+---------+----------+------+
+3 rows in set (0.00 sec)
+
+79) Write a query that will give you the names and cities of all salespeople in London with a commission above 0.10.
+>>
+mysql> SELECT SNAME , CITY FROM SALESPEOPLE
+    -> WHERE CITY = 'lONDON' AND COMM>10;
++--------+--------+
+| SNAME  | CITY   |
++--------+--------+
+| Peel   | London |
+| Motika | London |
+| Fran   | London |
++--------+--------+
+3 rows in set (0.00 sec)
+
+80) Write a query that selects each customer’s smallest order. 
+>>
+mysql> SELECT CNUM , MIN(AMT) AS MINIMUM_ODER FROM ORDERS
+    -> GROUP BY CNUM;
++------+--------------+
+| CNUM | MINIMUM_ODER |
++------+--------------+
+| 2008 |        18.69 |
+| 2007 |      1900.10 |
+| 2001 |       767.19 |
+| 2003 |      5160.45 |
+| 2004 |        75.75 |
+| 2006 |      4723.00 |
+| 2002 |      1713.23 |
++------+--------------+
+7 rows in set (0.00 sec)
+
+81) Write a query that selects the first customer in alphabetical order whose name begins with ‘G’.
+>>
+mysql> SELECT MIN(CNAME) AS NAME FROM CUSTOMERS
+    -> WHERE CNAME LIKE 'G%';
++----------+
+| NAME     |
++----------+
+| Glovanni |
++----------+
+1 row in set (0.01 sec)
+
+82) -----------------------------------------------------------------------------------------------------------
+
+83) Find the average amount from the Orders Table.
+>>
+mysql> select avg(amt) as AVG_AMOUNT from orders;
++-------------+
+| AVG_AMOUNT  |
++-------------+
+| 2665.840000 |
++-------------+
+1 row in set (0.00 sec)
+
+84) Find all customers who are not located in SanJose and whose rating is above 200.
+>>
+mysql> select * from customers
+    -> where city!='sanjose' and rating>200;
++------+-------+--------+--------+------+
+| CNUM | CNAME | CITY   | RATING | SNUM |
++------+-------+--------+--------+------+
+| 2004 | Grass | Berlin | 300    | 1002 |
++------+-------+--------+--------+------+
+1 row in set (0.05 sec)
+
+85) Give a simpler way to write this query.SELECT snum, sname, city, comm FROM salespeople WHERE (comm > + 0.12 OR comm < 0.14);
+>>
+mysql> SELECT snum, sname, city, comm FROM salespeople;
++------+---------+-----------+------+
+| snum | sname   | city      | comm |
++------+---------+-----------+------+
+| 1001 | Peel    | London    |   12 |
+| 1002 | Serres  | Sanjose   |   13 |
+| 1003 | AxelRod | New York  |   10 |
+| 1004 | Motika  | London    |   11 |
+| 1007 | Rifkin  | Barcelona |   15 |
+| 1008 | Fran    | London    |   25 |
++------+---------+-----------+------+
+6 rows in set (0.05 sec)
+
+86) Which salespersons attend to customers not in the city they have been assigned to?
+>>
+mysql> SELECT S.SNUM , S.SNAME FROM SALESPEOPLE S , CUSTOMERS C
+    -> WHERE C.SNUM = S.SNUM AND C.CITY!=S.CITY;
++------+---------+
+| SNUM | SNAME   |
++------+---------+
+| 1003 | AxelRod |
+| 1002 | Serres  |
+| 1004 | Motika  |
+| 1007 | Rifkin  |
++------+---------+
+4 rows in set (0.02 sec)
+
+87) Which salespeople get commission greater than 0.11 are serving customers rated less than 250?
+>>
+mysql> SELECT S.SNUM , S.SNAME FROM SALESPEOPLE S , CUSTOMERS C
+    -> WHERE C.SNUM = S.SNUM AND C.RATING<250 AND S.COMM>11;
++------+--------+
+| SNUM | SNAME  |
++------+--------+
+| 1001 | Peel   |
+| 1002 | Serres |
+| 1001 | Peel   |
++------+--------+
+3 rows in set (0.00 sec)
+
+88) Which salespeople have been assigned to the same city but get different commission percentages?
+>>
+mysql> SELECT S.SNAME , S.CITY ,S.COMM FROM SALESPEOPLE S
+    -> WHERE EXISTS (SELECT * FROM SALESPEOPLE S1
+    -> WHERE S.CITY = S1.CITY AND S.SNUM != S1.SNUM AND S.COMM!=S1.COMM);
++--------+--------+------+
+| SNAME  | CITY   | COMM |
++--------+--------+------+
+| Peel   | London |   12 |
+| Motika | London |   11 |
+| Fran   | London |   25 |
++--------+--------+------+
+3 rows in set (0.00 sec)
+
+89) 
+>>
+mysql> SELECT * FROM SALESPEOPLE
+    -> WHERE COMM = (SELECT MAX(COMM) FROM SALESPEOPLE);
++------+-------+--------+------+
+| SNUM | SNAME | CITY   | COMM |
++------+-------+--------+------+
+| 1008 | Fran  | London |   25 |
++------+-------+--------+------+
+1 row in set (0.05 sec)
+
+90) -------------------------------------------------------------------------------------------------
+
+91) List all customers in descending order of customer rating.
+>>
+mysql> SELECT * FROM CUSTOMERS
+    -> ORDER BY RATING DESC;
++------+----------+---------+--------+------+
+| CNUM | CNAME    | CITY    | RATING | SNUM |
++------+----------+---------+--------+------+
+| 2004 | Grass    | Berlin  | 300    | 1002 |
+| 2008 | Cisneros | SanJose | 300    | 1007 |
+| 2002 | Glovanni | Rome    | 200    | 1003 |
+| 2003 | Liu      | SanJose | 200    | 1002 |
+| 2001 | Hoffman  | London  | 100    | 1001 |
+| 2006 | Clemens  | London  | 100    | 1001 |
+| 2007 | Pereira  | Rome    | 100    | 1004 |
++------+----------+---------+--------+------+
+7 rows in set (0.00 sec)
+
+92)
