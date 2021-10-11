@@ -1350,4 +1350,145 @@ mysql> SELECT * FROM CUSTOMERS
 +------+----------+---------+--------+------+
 7 rows in set (0.00 sec)
 
-92)
+92) On which days has Hoffman placed orders?
+>>
+mysql> select o.odate, o.cnum , c.cname
+    -> from orders o, customers c
+    -> where o.cnum = c.cnum and c.cname = 'hoffman';
++------------+------+---------+
+| odate      | cnum | cname   |
++------------+------+---------+
+| 1990-03-10 | 2001 | Hoffman |
++------------+------+---------+
+1 row in set (0.05 sec)
+
+93) Which salesmen have no orders between 10/03/1990 and 10/05/1990?
+>>
+mysql> select snum, sname , odate
+    -> from orders
+    -> left join salespeople
+    -> using(snum)
+    -> where odate not between '1990-03-10' and '1990-05-10';
++------+--------+------------+
+| snum | sname  | odate      |
++------+--------+------------+
+| 1002 | Serres | 1990-06-10 |
+| 1001 | Peel   | 1990-06-10 |
++------+--------+------------+
+2 rows in set (0.06 sec)
+
+94) How many salespersons have succeeded in getting orders?
+>>
+mysql> select count(distinct snum) as no_of_salespeople from orders;
++-------------------+
+| no_of_salespeople |
++-------------------+
+|                 5 |
++-------------------+
+1 row in set (0.00 sec)
+
+95) How many customers have placed orders?
+>>
+mysql> select count(distinct cnum) as no_of_customers from orders;
++-----------------+
+| no_of_customers |
++-----------------+
+|               7 |
++-----------------+
+1 row in set (0.00 sec)
+
+96) On which date has each salesman booked an order of maximum value?
+>>
+mysql> select o1.snum , o1.odate from orders o1
+    -> where o1.amt = (select max(o2.amt) from orders o2
+    -> where o1.snum=o2.snum);
++------+------------+
+| snum | odate      |
++------+------------+
+| 1004 | 1990-03-10 |
+| 1002 | 1990-03-10 |
+| 1007 | 1990-03-10 |
+| 1003 | 1990-04-10 |
+| 1001 | 1990-06-10 |
++------+------------+
+5 rows in set (0.00 sec)
+
+97) -----------------------------------------------------------------------------------------
+
+98) Which customers have the same rating?
+>>
+mysql> select * from customers
+    -> order by rating;
++------+----------+---------+--------+------+
+| CNUM | CNAME    | CITY    | RATING | SNUM |
++------+----------+---------+--------+------+
+| 2001 | Hoffman  | London  | 100    | 1001 |
+| 2006 | Clemens  | London  | 100    | 1001 |
+| 2007 | Pereira  | Rome    | 100    | 1004 |
+| 2002 | Glovanni | Rome    | 200    | 1003 |
+| 2003 | Liu      | SanJose | 200    | 1002 |
+| 2004 | Grass    | Berlin  | 300    | 1002 |
+| 2008 | Cisneros | SanJose | 300    | 1007 |
++------+----------+---------+--------+------+
+7 rows in set (0.00 sec)
+
+99 Find all orders greater than the average for October 4th.
+>>
+mysql> select * from orders
+    -> where amt>(select avg(amt) from orders where odate= '1990-04-10');
++------+---------+------------+------+------+
+| ONUM | AMT     | ODATE      | CNUM | SNUM |
++------+---------+------------+------+------+
+| 3002 | 1900.10 | 1990-03-10 | 2007 | 1004 |
+| 3005 | 5160.45 | 1990-03-10 | 2003 | 1002 |
+| 3006 | 1098.16 | 1990-03-10 | 2008 | 1007 |
+| 3008 | 4723.00 | 1990-05-10 | 2006 | 1001 |
+| 3009 | 1713.23 | 1990-04-10 | 2002 | 1003 |
+| 3010 | 1309.95 | 1990-06-10 | 2004 | 1002 |
+| 3011 | 9891.88 | 1990-06-10 | 2006 | 1001 |
++------+---------+------------+------+------+
+7 rows in set (0.05 sec)
+
+100) --------------------------------------------------------------------------------------------------------
+
+101) Which customers have above average orders?
+>>
+mysql> select c.cname ,o.amt from customers c , orders o
+    -> where c.cnum = o.cnum and o.amt>(select avg(amt) from orders);
++---------+---------+
+| cname   | amt     |
++---------+---------+
+| Liu     | 5160.45 |
+| Clemens | 4723.00 |
+| Clemens | 9891.88 |
++---------+---------+
+3 rows in set (0.00 sec)
+
+102) Select the total amount in orders for each salesperson for which the total is greater than the amount of the largest order in the table.
+>>
+mysql> select snum , sum(amt) from orders
+    -> group by snum
+    -> having(sum(amt)>(select max(amt) from orders));
++------+----------+
+| snum | sum(amt) |
++------+----------+
+| 1001 | 15382.07 |
++------+----------+
+1 row in set (0.05 sec)
+
+103) Give names and numbers of all salespersons that have more than one customer?
+>>
+mysql> select snum , sname ,count(snum)
+    -> from customers left join salespeople
+    -> using(snum)
+    -> group by snum
+    -> having(count(snum)>1);
++------+--------+-------------+
+| snum | sname  | count(snum) |
++------+--------+-------------+
+| 1001 | Peel   |           2 |
+| 1002 | Serres |           2 |
++------+--------+-------------+
+2 rows in set (0.00 sec)
+
+104) 
